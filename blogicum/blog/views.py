@@ -85,7 +85,7 @@ class PostDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = CommentForm
+        context['form'] = CommentForm()
         context['comments'] = self.object.post.all().select_related(
             'author'
         )
@@ -159,10 +159,11 @@ def edit_comment(request, post_id, comment_id):
     instance = get_object_or_404(Comment, id=comment_id)
     form = CommentForm(request.POST or None, instance=instance)
     context = {'form': form, 'comment': instance}
-    if request.method == 'POST':
-        if form.is_valid():
-            form.save()
-            return redirect('blog:post_detail', pk=post_id)
+    if instance.author == request.user:
+        if request.method == 'POST':
+            if form.is_valid():
+                form.save()
+                return redirect('blog:post_detail', pk=post_id)
     return render(request, 'blog/comment.html', context)
 
 
@@ -174,4 +175,4 @@ def comment_delete(request, post_id, comment_id):
         if request.method == 'POST':
             comment.delete()
             return redirect('blog:post_detail', pk=post_id)
-        return render(request, 'blog/comment.html', context)
+    return render(request, 'blog/comment.html', context)
