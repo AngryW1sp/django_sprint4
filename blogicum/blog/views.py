@@ -7,7 +7,11 @@ from .models import Category, Post, User, Comment
 from core.filters import post_filter, get_filter, user_post_filter
 from core.canstants import POST_COUNT
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import CreateView, UpdateView, DeleteView, DetailView, ListView
+from django.views.generic import (CreateView,
+                                  UpdateView,
+                                  DeleteView,
+                                  DetailView,
+                                  ListView)
 
 
 def get_pagination(post_list, request):
@@ -80,9 +84,9 @@ class PostDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["form"] = CommentForm
-        context["comments"] = self.object.post.all().select_related(
-            "author"
+        context['form'] = CommentForm
+        context['comments'] = self.object.post.all().select_related(
+            'author'
         )
         return context
 
