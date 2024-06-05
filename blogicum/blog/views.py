@@ -7,6 +7,7 @@ from .models import Category, Post, User, Comment
 from core.filters import post_filter, get_filter, user_post_filter
 from core.canstants import POST_COUNT
 from django.contrib.auth.mixins import LoginRequiredMixin
+
 from django.views.generic import (CreateView,
                                   UpdateView,
                                   DeleteView,
@@ -105,14 +106,18 @@ def category_post(request, category_slug):
 
     post_list = get_filter().filter(category=category)
     page_obj = get_pagination(post_list, request)
-    return render(request, 'blog/category.html', {'page_obj': page_obj, 'category': category_slug})
+    return render(request, 'blog/category.html',
+                  {'page_obj': page_obj, 'category': category_slug})
 
 
 def profile(request, username):
     user = get_object_or_404(User, username=username)
-    post_list = user_post_filter().filter(author_id=user.id).order_by('-pub_date')
+    post_list = (user_post_filter()
+                 .filter(author_id=user.id)
+                 .order_by('-pub_date'))
     page_obj = get_pagination(post_list, request)
-    return render(request, 'blog/profile.html', {'profile': user, 'page_obj': page_obj})
+    return render(request, 'blog/profile.html',
+                  {'profile': user, 'page_obj': page_obj})
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
