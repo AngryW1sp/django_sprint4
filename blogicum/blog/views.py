@@ -25,7 +25,7 @@ class DispathMixin:
 
     def dispatch(self, request, *args, **kwargs):
         if self.get_object().author != request.user:
-            return redirect("blog:post_detail", pk=self.kwargs['post_id'])
+            return redirect("blog:post_detail", post_id=self.kwargs['post_id'])
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -49,7 +49,7 @@ class PostUpdateView(DispathMixin, LoginRequiredMixin, UpdateView):
     template_name = 'blog/create.html'
 
     def get_success_url(self):
-        return reverse('blog:post_detail', kwargs={'pk': self.object.pk})
+        return reverse('blog:post_detail', args=[self.kwargs['post_id']])
 
 
 class PostDeleteView(DispathMixin, LoginRequiredMixin, DeleteView):
@@ -70,12 +70,13 @@ class PostDetailView(LoginRequiredMixin, DetailView):
     model = Post
     template_name = 'blog/detail.html'
     post_object = None
+    pk_url_kwarg = 'post_id'
 
     def get_queryset(self):
-        self.post_object = get_object_or_404(Post, pk=self.kwargs['pk'])
+        self.post_object = get_object_or_404(Post, pk=self.kwargs['post_id'])
         if self.post_object.author == self.request.user:
-            return user_post_filter().filter(pk=self.kwargs['pk'])
-        return get_filter().filter(pk=self.kwargs['pk'])
+            return user_post_filter().filter(pk=self.kwargs['post_id'])
+        return get_filter().filter(pk=self.kwargs['post_id'])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -144,7 +145,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('blog:post_detail', kwargs={'pk': self.post_object.pk})
+        return reverse('blog:post_detail', args=[self.kwargs['post_id']])
 
 
 @login_required
@@ -156,7 +157,7 @@ def edit_comment(request, post_id, comment_id):
         if request.method == 'POST':
             if form.is_valid():
                 form.save()
-                return redirect('blog:post_detail', pk=post_id)
+                return redirect('blog:post_detail', post_id=post_id)
     return render(request, 'blog/comment.html', context)
 
 
@@ -167,5 +168,5 @@ def comment_delete(request, post_id, comment_id):
     if comment.author == request.user:
         if request.method == 'POST':
             comment.delete()
-            return redirect('blog:post_detail', pk=post_id)
+            return redirect('blog:post_detail', post_id=post_id)
     return render(request, 'blog/comment.html', context)

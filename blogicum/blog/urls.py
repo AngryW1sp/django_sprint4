@@ -12,14 +12,9 @@ urlpatterns = [
          views.PostListView.as_view(),
          name='index'),
     # Содержание поста
-    path('posts/<int:pk>/',
+    path('posts/<int:post_id>/',
          views.PostDetailView.as_view(),
          name='post_detail'),
-    # Я если честно несолько раз попробовал все поменять на post_id,
-    # но там возникает ошибка, которая не исправляется
-    # form.base_form_tester.FormValidationException: Reverse for 'post_detail'
-    # with keyword arguments '{'pk': 7}' not found.
-    # 1 pattern(s) tried: ['posts/(?P<post_id>[0-9]+)/\\Z']
 
     # Посты в категории
     path('category/<slug:category_slug>/',
