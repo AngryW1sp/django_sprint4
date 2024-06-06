@@ -41,7 +41,8 @@ class DispathMixin(PostMixin):
         return super().dispatch(request, *args, **kwargs)
 
 
-class PostCreateView(ProfileReverseMixin, PostMixin, LoginRequiredMixin, CreateView):
+class PostCreateView(ProfileReverseMixin, PostMixin,
+                     LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -54,7 +55,8 @@ class PostUpdateView(DispathMixin, LoginRequiredMixin, UpdateView):
         return reverse('blog:post_detail', args=[self.kwargs['post_id']])
 
 
-class PostDeleteView(ProfileReverseMixin, DispathMixin, LoginRequiredMixin, DeleteView):
+class PostDeleteView(ProfileReverseMixin, DispathMixin,
+                     LoginRequiredMixin, DeleteView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
