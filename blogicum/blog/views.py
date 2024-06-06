@@ -19,10 +19,20 @@ def get_paginate(post_list, request):
     return page_obj
 
 
-class DispathMixin:
+class ProfileReverseMixin:
+
+    def get_success_url(self):
+        username = self.request.user
+        return reverse_lazy('blog:profile', kwargs={'username': username})
+
+
+class PostMixin:
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
+
+
+class DispathMixin(PostMixin):
     pk_url_kwarg = 'post_id'
 
     def dispatch(self, request, *args, **kwargs):
@@ -31,18 +41,11 @@ class DispathMixin:
         return super().dispatch(request, *args, **kwargs)
 
 
-class PostCreateView(LoginRequiredMixin, CreateView):
-    model = Post
-    form_class = PostForm
-    template_name = 'blog/create.html'
+class PostCreateView(ProfileReverseMixin, PostMixin, LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
-
-    def get_success_url(self):
-        username = self.request.user
-        return reverse_lazy('blog:profile', kwargs={'username': username})
 
 
 class PostUpdateView(DispathMixin, LoginRequiredMixin, UpdateView):
@@ -51,16 +54,12 @@ class PostUpdateView(DispathMixin, LoginRequiredMixin, UpdateView):
         return reverse('blog:post_detail', args=[self.kwargs['post_id']])
 
 
-class PostDeleteView(DispathMixin, LoginRequiredMixin, DeleteView):
+class PostDeleteView(ProfileReverseMixin, DispathMixin, LoginRequiredMixin, DeleteView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = PostForm(instance=self.object)
         return context
-
-    def get_success_url(self):
-        username = self.request.user
-        return reverse_lazy('blog:profile', kwargs={'username': username})
 
 
 class PostDetailView(LoginRequiredMixin, DetailView):
@@ -111,7 +110,7 @@ def profile(request, username):
                   {'profile': user, 'page_obj': page_obj})
 
 
-class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+class ProfileUpdateView(ProfileReverseMixin, LoginRequiredMixin, UpdateView):
     model = User
     form_class = UserForm
     template_name = 'blog/user.html'
@@ -119,10 +118,6 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_object(self):
         return self.request.user
-
-    def get_success_url(self):
-        username = self.request.user
-        return reverse("blog:profile", kwargs={"username": username})
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
