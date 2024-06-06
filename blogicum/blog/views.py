@@ -20,7 +20,9 @@ def get_paginate(post_list, request):
 
 
 class DispathMixin:
-
+    model = Post
+    form_class = PostForm
+    template_name = 'blog/create.html'
     pk_url_kwarg = 'post_id'
 
     def dispatch(self, request, *args, **kwargs):
@@ -44,17 +46,12 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
 
 class PostUpdateView(DispathMixin, LoginRequiredMixin, UpdateView):
-    model = Post
-    form_class = PostForm
-    template_name = 'blog/create.html'
 
     def get_success_url(self):
         return reverse('blog:post_detail', args=[self.kwargs['post_id']])
 
 
 class PostDeleteView(DispathMixin, LoginRequiredMixin, DeleteView):
-    model = Post
-    template_name = 'blog/create.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
