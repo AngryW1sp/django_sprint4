@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from core.canstants import MAX_FIELD_LENGTH
 from core.models import PublishingModel
+
+
 User = get_user_model()
 
 
@@ -18,7 +20,7 @@ class Category(PublishingModel):
 
     class Meta:
 
-        verbose_name = "категория"
+        verbose_name = "Категория"
         verbose_name_plural = "Категории"
 
     def __str__(self):
@@ -83,9 +85,13 @@ class Post(PublishingModel):
 
 
 class Comment(models.Model):
-    text = models.TextField('Текст комментария')
-    created_at = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField(verbose_name='Текст комментария')
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Добавлено",
+    )
+    author = models.ForeignKey(User, on_delete=models.CASCADE,
+                               verbose_name="Автор поста")
     post = models.ForeignKey(
         Post,
         null=True,
