@@ -18,7 +18,8 @@ def limited_access_posts():
 
 def displayed_posts(queryset=Post.objects.all()):
     filtred_queryset = (queryset.
-                        annotate(comment_count=Count('post')).order_by("-pub_date"))
+                        annotate(comment_count=Count('post')).
+                        order_by("-pub_date"))
 
     return filtred_queryset
 
