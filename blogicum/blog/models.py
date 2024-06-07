@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+
 from core.canstants import MAX_FIELD_LENGTH
 from core.models import PublishingModel
-
 
 User = get_user_model()
 

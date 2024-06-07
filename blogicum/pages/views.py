@@ -1,5 +1,5 @@
 
-from http.client import FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND
+from http import HTTPStatus
 
 from django.shortcuts import render
 from django.views.generic import TemplateView
@@ -14,12 +14,12 @@ class Rules(TemplateView):
 
 
 def page_not_found(request, exception):
-    return render(request, 'pages/404.html', status=NOT_FOUND)
+    return render(request, 'pages/404.html', status=HTTPStatus.NOT_FOUND)
 
 
 def csrf_failure(request, reason=''):
-    return render(request, 'pages/403csrf.html', status=FORBIDDEN)
+    return render(request, 'pages/403csrf.html', status=HTTPStatus.FORBIDDEN)
 
 
 def server_error(request, exception=None):
-    return render(request, 'pages/500.html', status=INTERNAL_SERVER_ERROR)
+    return render(request, 'pages/500.html', status=HTTPStatus.INTERNAL_SERVER_ERROR)

@@ -1,44 +1,15 @@
-from core.canstants import POST_COUNT
-from core.filters import get_filter, post_filter, user_post_filter
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
 
 from .forms import CommentForm, PostForm, UserForm
+from .mixins import DispathMixin, PostMixin, ProfileReverseMixin
 from .models import Category, Comment, Post, User
-
-
-def get_paginate(post_list, request):
-    paginator = Paginator(post_list, POST_COUNT)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return page_obj
-
-
-class ProfileReverseMixin:
-
-    def get_success_url(self):
-        username = self.request.user
-        return reverse_lazy('blog:profile', kwargs={'username': username})
-
-
-class PostMixin:
-    model = Post
-    form_class = PostForm
-    template_name = 'blog/create.html'
-
-
-class DispathMixin(PostMixin):
-    pk_url_kwarg = 'post_id'
-
-    def dispatch(self, request, *args, **kwargs):
-        if self.get_object().author != request.user:
-            return redirect("blog:post_detail", post_id=self.kwargs['post_id'])
-        return super().dispatch(request, *args, **kwargs)
+from .querysets import displayed_posts, get_paginate, limited_access_posts
+from core.canstants import POST_COUNT
 
 
 class PostCreateView(ProfileReverseMixin, PostMixin,
@@ -73,8 +44,9 @@ class PostDetailView(LoginRequiredMixin, DetailView):
     def get_queryset(self):
         self.post_object = get_object_or_404(Post, pk=self.kwargs['post_id'])
         if self.post_object.author == self.request.user:
-            return user_post_filter().filter(pk=self.kwargs['post_id'])
-        return get_filter().filter(pk=self.kwargs['post_id'])
+            return displayed_posts().filter(pk=self.kwargs['post_id'])
+        return (displayed_posts(limited_access_posts()).
+                filter(pk=self.kwargs['post_id']))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -88,7 +60,7 @@ class PostDetailView(LoginRequiredMixin, DetailView):
 class PostListView(ListView):
     model = Post
     template_name = 'blog/index.html'
-    queryset = post_filter()
+    queryset = displayed_posts(queryset=limited_access_posts())
     paginate_by = POST_COUNT
 
 
@@ -97,7 +69,8 @@ def category_post(request, category_slug):
         Category, slug=category_slug, is_published=True
     )
 
-    post_list = get_filter().filter(category=category)
+    post_list = (displayed_posts(limited_access_posts())
+                 .filter(category=category))
     page_obj = get_paginate(post_list, request)
     return render(request, 'blog/category.html',
                   {'page_obj': page_obj, 'category': category_slug})
@@ -105,7 +78,7 @@ def category_post(request, category_slug):
 
 def profile(request, username):
     user = get_object_or_404(User, username=username)
-    post_list = (user_post_filter()
+    post_list = (displayed_posts()
                  .filter(author_id=user.id))
     page_obj = get_paginate(post_list, request)
     return render(request, 'blog/profile.html',
