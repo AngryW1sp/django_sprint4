@@ -2,13 +2,18 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
-from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+from django.views.generic import (CreateView, DeleteView, 
+                                  DetailView, ListView,
                                   UpdateView)
 
 from .forms import CommentForm, PostForm, UserForm
-from .mixins import DispathMixin, PostMixin, ProfileReverseMixin
+from .mixins import (DispathMixin, 
+                     PostMixin, 
+                     ProfileReverseMixin)
 from .models import Category, Comment, Post, User
-from .querysets import displayed_posts, get_paginate, limited_access_posts
+from .querysets import (displayed_posts, 
+                        get_paginate, 
+                        limited_access_posts)
 from core.canstants import POST_COUNT
 
 
@@ -42,7 +47,8 @@ class PostDetailView(LoginRequiredMixin, DetailView):
     pk_url_kwarg = 'post_id'
 
     def get_queryset(self):
-        self.post_object = get_object_or_404(Post, pk=self.kwargs['post_id'])
+        self.post_object = get_object_or_404(Post, 
+                                             pk=self.kwargs['post_id'])   
         if self.post_object.author == self.request.user:
             return displayed_posts().filter(pk=self.kwargs['post_id'])
         return (displayed_posts(limited_access_posts()).
@@ -60,7 +66,8 @@ class PostDetailView(LoginRequiredMixin, DetailView):
 class PostListView(ListView):
     model = Post
     template_name = 'blog/index.html'
-    queryset = displayed_posts(queryset=limited_access_posts())
+    queryset = displayed_posts(
+        queryset=limited_access_posts())
     paginate_by = POST_COUNT
 
 
@@ -85,7 +92,9 @@ def profile(request, username):
                   {'profile': user, 'page_obj': page_obj})
 
 
-class ProfileUpdateView(ProfileReverseMixin, LoginRequiredMixin, UpdateView):
+class ProfileUpdateView(ProfileReverseMixin, 
+                        LoginRequiredMixin, 
+                        UpdateView):
     model = User
     form_class = UserForm
     template_name = 'blog/user.html'

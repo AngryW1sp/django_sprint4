@@ -7,8 +7,8 @@ SECRET_KEY = 'django-insecure-mj8%_e7u6qcc$dz=^spuvqja*+l^g8_4o7(7m91lehl+r3pce*
 
 DEBUG = True
 ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
+    'timurmyfirstproject.pythonanywhere.com',
+    'www.timurmyfirstproject.pythonanywhere.com',
 ]
 
 
